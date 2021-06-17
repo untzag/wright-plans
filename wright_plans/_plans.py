@@ -12,13 +12,18 @@ __all__ = [
         ]
 
 from graphlib import TopologicalSorter
+from typing import Dict, List, Optional
 
 import bluesky.plan_stubs
 from bluesky import plans as bsp
 import toolz
 
+from bluesky.protocols import Readable, Movable
+
 from ._constants import Constant
 from ._units import ureg, get_units
+
+import pydantic
 
 def make_one_nd_step(constants=None, axis_units=None, per_step=None):
     """Generate a one_nd_step function for given metadata.
@@ -111,7 +116,7 @@ def rel_list_grid_scan(detectors, *args, constants=None, snake_axes=False, per_s
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
     yield from bsp.rel_list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
 
-def grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
+def grid_scan(detectors: List[pydantic.PyObject], *args, constants: Optional[Dict[pydantic.PyObject, pydantic.PyObject]]=None, snake_axes: bool=False, per_step=None, md=None):
     nargs=5
     axis_units = _axis_units_from_args(args, nargs)
     per_step = make_one_nd_step(constants, axis_units, per_step)
